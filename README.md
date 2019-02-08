@@ -16,10 +16,22 @@ yarn add vue-axios-interceptors
 // Make sure you import this package after you've imported Vue:
 window.Vue = require('vue');
 
-require('vue-axios-interceptors');
-
 // Make sure the axios package is available globally on the window object:
 window.axios = require('axios');
+
+import responseHandler from 'vue-axios-interceptors';
+
+window.axios.interceptors.response.use(
+    response => {
+      handleResponse(response);
+      return response;
+    },
+    error => {
+      handleResponse(error.response);
+      //bugsnagClient.notify(error); //add your error handlers like bugsnag etc.
+      return Promise.reject(error);
+    },
+);
 ```
 
 ### Usage
