@@ -14,7 +14,7 @@ window.Vue = require('vue');
 // Make sure the axios package is available globally on the window object:
 window.axios = require('axios');
 
-import handleResponse from 'vue-axios-interceptors';
+import handleResponse from '@pmochine/vue-axios-interceptors';
 
 window.axios.interceptors.response.use(
     response => {
