@@ -19,7 +19,7 @@ const handleResponse = (response) => {
     const statusCategory = parseInt(status.toString().charAt(0), 10);
     const category = categories[statusCategory - 1];
     const sluggedCode = slugify(codes[status]);
-    const data = { status, code: codes[status], body: response.data };
+    const data = { status, code: codes[status], body: response.data, headers: response.headers };
 
     // Parse the validation errors.
     if (parseInt(status, 10) === 422) {
