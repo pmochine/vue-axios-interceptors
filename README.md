@@ -1,6 +1,3 @@
-[![Latest Version on NPM](https://img.shields.io/npm/v/vue-axios-interceptors.svg?style=flat-square)](https://npmjs.com/package/vue-axios-interceptors)
-[![Total Downloads on NPM](https://img.shields.io/npm/dt/vue-axios-interceptors.svg)](https://www.npmjs.com/package/vue-axios-interceptors)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 
 # vue-axios-interceptors
 Catch and handle ajax errors globally when using `Axios` with `Vue`.
@@ -17,7 +14,7 @@ window.Vue = require('vue');
 // Make sure the axios package is available globally on the window object:
 window.axios = require('axios');
 
-import responseHandler from 'vue-axios-interceptors';
+import handleResponse from 'vue-axios-interceptors';
 
 window.axios.interceptors.response.use(
     response => {
