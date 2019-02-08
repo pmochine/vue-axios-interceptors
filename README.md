@@ -7,9 +7,7 @@ Catch and handle ajax errors globally when using `Axios` with `Vue`.
 
 ### Installation
 ```bash
-npm install vue-axios-interceptors --save
-// or
-yarn add vue-axios-interceptors
+npm i @pmochine/vue-axios-interceptors
 ```
 
 ```javascript
