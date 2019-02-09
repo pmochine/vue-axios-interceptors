@@ -109,6 +109,6 @@ If you discover any security related issues, please don't email me. I'm afraid �
 
 Now comes the best part! 😍
 
- - Idea found on https://github.com/RobertGlynWilliams/vee-validate-laravel
+ - Idea found on https://github.com/mattias-persson/vue-axios-interceptors
 
 Oh come on. You read everything?? If you liked it so far, hit the ⭐️ button to give me a 🤩 face. 
