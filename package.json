@@ -1,12 +1,12 @@
 {
   "name": "@pmochine/vue-axios-interceptors",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Catch and handle ajax errors globally when using Axios with Vue",
   "main": "intercept.js",
   "dependencies": {},
   "devDependencies": {
-    "eslint": "^5.13.0",
-    "eslint-config-avidofood": "^1.0.1"
+    "eslint": "^6.8.0",
+    "eslint-config-avidofood": "^1.1.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
