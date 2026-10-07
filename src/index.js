@@ -1,7 +1,15 @@
 import createEmitter from './emitter';
 import { slugify, statusCodes } from './utility';
 
-export const intercepted = createEmitter();
+// One event bus for all copies of the package, for example an ES module and a CommonJS copy,
+// or two bundles on one page. The key has the major version, because the event bus of
+// another major version can work differently.
+const busKey = Symbol.for('@pmochine/vue-axios-interceptors@2');
+if (!globalThis[busKey]) {
+    globalThis[busKey] = createEmitter();
+}
+
+export const intercepted = globalThis[busKey];
 
 // Version 1.x put the event bus on window. Listeners written for 1.x keep working.
 if (typeof window !== 'undefined') {
