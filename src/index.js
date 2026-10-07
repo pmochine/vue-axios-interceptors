@@ -56,18 +56,19 @@ const handleValidationErrors = (response) => {
         return null;
     }
 
-    // Attempt to parse Laravel-structured validation errors.
-    try {
-        const messages = {};
+    // Laravel validation errors: { message, errors: { field: ['message', ...] } }
+    const { errors } = response.data;
+    const isFieldMap = errors !== null && typeof errors === 'object' && !Array.isArray(errors)
+        && Object.values(errors).every(Array.isArray);
 
-        Object.keys(response.data.errors).forEach((key) => {
-            messages[key] = response.data.errors[key].join(',');
-        });
-
-        return messages;
-    } catch (e) {
+    if (!isFieldMap) {
         return response.data;
     }
+
+    // Object.fromEntries keeps a field named __proto__ as a normal field
+    return Object.fromEntries(
+        Object.entries(errors).map(([field, messages]) => [field, messages.join(',')]),
+    );
 };
 
 export default handleResponse;

@@ -133,6 +133,34 @@ describe('handleResponse', () => {
         expect(calls[0][1].body).toBe(data);
     });
 
+    it('keeps fields with the names __proto__ and constructor', () => {
+        const calls = record(['response:422']);
+        const data = JSON.parse('{"errors":{"__proto__":["Required"],"constructor":["Invalid"]}}');
+
+        handleResponse({ status: 422, data, headers: {} });
+
+        const { body } = calls[0][1];
+        expect(Object.keys(body)).toEqual(['__proto__', 'constructor']);
+        expect(Object.getOwnPropertyDescriptor(body, '__proto__').value).toBe('Required');
+        expect(body.constructor).toBe('Invalid');
+        expect(Object.getPrototypeOf(body)).toBe(Object.prototype);
+    });
+
+    it.each([
+        ['false', false],
+        ['0', 0],
+        ['a string', 'Invalid'],
+        ['an array', [['Invalid']]],
+        ['a field with a string', { email: 'Invalid' }],
+    ])('keeps the body of a 422 response when errors is %s', (name, errors) => {
+        const calls = record(['response:422']);
+        const data = { message: 'Invalid', errors };
+
+        handleResponse({ status: 422, data, headers: {} });
+
+        expect(calls[0][1].body).toBe(data);
+    });
+
     it('sets the body of an empty 422 response to null', () => {
         const calls = record(['response:422']);
 
