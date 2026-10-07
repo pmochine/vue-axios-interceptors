@@ -8,32 +8,35 @@ if (typeof window !== 'undefined') {
     window.intercepted = intercepted;
 }
 
+const isStatus = (status) => Number.isInteger(status) && status >= 100 && status <= 599;
+
 const handleResponse = (response) => {
     const categories = ['informational', 'success', 'redirection', 'client-error', 'server-error'];
-    const codes = statusCodes();
 
     // A network error, a timeout or a cancelled request has no response
-    if (!response || !codes[response.status]) {
+    if (!response || !isStatus(response.status)) {
         return false;
     }
 
     const { status } = response;
-
-    const statusCategory = parseInt(status.toString().charAt(0), 10);
+    const code = statusCodes()[status] || null;
+    const statusCategory = Math.floor(status / 100);
     const category = categories[statusCategory - 1];
-    const sluggedCode = slugify(codes[status]);
     const data = {
-        status, code: codes[status], body: response.data, headers: response.headers,
+        status, code, body: response.data, headers: response.headers,
     };
 
     // Parse the validation errors.
-    if (parseInt(status, 10) === 422) {
+    if (status === 422) {
         data.body = handleValidationErrors(response);
     }
 
     intercepted.$emit('response', data);
     intercepted.$emit(`response:${category}`, data);
-    intercepted.$emit(`response:${sluggedCode}`, data);
+    // A status without a name in the list, for example 522 from Cloudflare, has no name event
+    if (code) {
+        intercepted.$emit(`response:${slugify(code)}`, data);
+    }
     intercepted.$emit(`response:${status}`, data);
     intercepted.$emit(`response:${statusCategory}xx`, data);
 

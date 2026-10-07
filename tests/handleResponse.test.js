@@ -62,6 +62,47 @@ describe('handleResponse', () => {
         expect(calls.map(([event]) => event)).toEqual([`response:${category}`, `response:${String(status)[0]}xx`]);
     });
 
+    it.each([
+        [419, 'page-expired'],
+        [425, 'too-early'],
+        [103, 'early-hints'],
+    ])('emits the name event of status %i, which 1.x did not know', (status, name) => {
+        const calls = record([`response:${name}`]);
+
+        handleResponse({ status, data: null, headers: {} });
+
+        expect(calls.map(([event]) => event)).toEqual([`response:${name}`]);
+    });
+
+    it('emits the events for a status without a name, without the name event', () => {
+        const calls = [];
+        const originalEmit = intercepted.$emit;
+        intercepted.$emit = (event, data) => calls.push([event, data]);
+
+        try {
+            expect(handleResponse({ status: 522, data: 'Timeout', headers: {} })).toBe(true);
+        } finally {
+            intercepted.$emit = originalEmit;
+        }
+
+        const data = {
+            status: 522, code: null, body: 'Timeout', headers: {},
+        };
+        expect(calls).toEqual([
+            ['response', data],
+            ['response:server-error', data],
+            ['response:522', data],
+            ['response:5xx', data],
+        ]);
+    });
+
+    it.each([0, 99, 600, 404.5, '404', NaN, undefined])('ignores the status %s', (status) => {
+        const calls = record(['response']);
+
+        expect(handleResponse({ status, data: null, headers: {} })).toBe(false);
+        expect(calls).toEqual([]);
+    });
+
     it('turns Laravel validation errors of a 422 response into one message per field', () => {
         const calls = record(['response:422']);
 
