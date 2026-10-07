@@ -173,7 +173,7 @@ useIntercepted('no-response', () => {
 </template>
 ```
 
-`useIntercepted` takes the same events and listeners as `intercepted.$on`, also an array of events. It returns a function that removes the listener earlier. Outside of a component, for example in a store, the listener stays until the effect scope stops or until you call that function. On the server, it adds no listener, because the server does not unmount components.
+`useIntercepted` takes the same events and listeners as `intercepted.$on`, also an array of events. It returns a function that removes the listener earlier. `intercepted.$off(event, listener)` does not remove it, because `useIntercepted` registers a function of its own. Outside of a component, for example in a store, the listener stays until the effect scope stops or until you call that function. On the server, it adds no listener, because the server does not unmount components.
 
 `useIntercepted` works with Vue 3.2 or newer and with Vue 2.7. Vue is an optional peer dependency: you only need it for this import.
 
