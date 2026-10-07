@@ -161,6 +161,14 @@ describe('handleResponse', () => {
         expect(calls[0][1].body).toBe(data);
     });
 
+    it('keeps the body of a 422 response when a message cannot be joined', () => {
+        const calls = record(['response:422']);
+        const data = { errors: { email: [{ toString: null }] } };
+
+        expect(() => handleResponse({ status: 422, data, headers: {} })).not.toThrow();
+        expect(calls[0][1].body).toBe(data);
+    });
+
     it('sets the body of an empty 422 response to null', () => {
         const calls = record(['response:422']);
 

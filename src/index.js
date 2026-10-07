@@ -65,10 +65,16 @@ const handleValidationErrors = (response) => {
         return response.data;
     }
 
-    // Object.fromEntries keeps a field named __proto__ as a normal field
-    return Object.fromEntries(
-        Object.entries(errors).map(([field, messages]) => [field, messages.join(',')]),
-    );
+    // Object.fromEntries keeps a field named __proto__ as a normal field.
+    // join() throws for a message that has no string value. Then the body stays as it is,
+    // because an error here would replace the axios error in the interceptor.
+    try {
+        return Object.fromEntries(
+            Object.entries(errors).map(([field, messages]) => [field, messages.join(',')]),
+        );
+    } catch (e) {
+        return response.data;
+    }
 };
 
 export default handleResponse;
