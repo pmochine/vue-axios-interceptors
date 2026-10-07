@@ -174,6 +174,19 @@ describe('createEmitter', () => {
         expect(globalThis.reportError).toHaveBeenCalledWith(error);
     });
 
+    it('reports a rejected promise once when listeners return the same promise, like Vue 2.7', async () => {
+        vi.stubGlobal('reportError', vi.fn());
+        const emitter = createEmitter();
+        const rejected = Promise.reject(new Error('shared'));
+        emitter.$on(['a', 'b'], () => rejected);
+
+        emitter.$emit('a');
+        emitter.$emit('b');
+        await new Promise((resolve) => { setTimeout(resolve); });
+
+        expect(globalThis.reportError).toHaveBeenCalledTimes(1);
+    });
+
     it('logs the error with console.error without reportError', () => {
         vi.stubGlobal('reportError', undefined);
         vi.spyOn(console, 'error').mockImplementation(() => {});

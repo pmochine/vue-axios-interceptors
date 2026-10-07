@@ -12,6 +12,13 @@ const report = (error) => {
     }
 };
 
+// Promises that already have a rejection handler. Vue 2.7 marks them with _handled,
+// so a promise that several listeners return is reported once.
+const handledPromises = new WeakSet();
+
+const isPromise = (value) => value !== null && (typeof value === 'object' || typeof value === 'function')
+    && typeof value.then === 'function' && typeof value.catch === 'function';
+
 export default function createEmitter() {
     let listeners = new Map();
 
@@ -85,7 +92,8 @@ export default function createEmitter() {
             [...callbacks].forEach((callback) => {
                 try {
                     const result = callback.apply(emitter, args);
-                    if (result && typeof result.catch === 'function') {
+                    if (isPromise(result) && !handledPromises.has(result)) {
+                        handledPromises.add(result);
                         result.catch(report);
                     }
                 } catch (error) {
