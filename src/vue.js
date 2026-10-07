@@ -12,15 +12,18 @@ export const useIntercepted = (event, listener) => {
         return () => {};
     }
 
-    intercepted.$on(event, listener);
+    // A copy, so a later change to the array does not change what stop() removes
+    const events = Array.isArray(event) ? [...event] : event;
 
-    let active = true;
-    const stop = () => {
-        if (active) {
-            active = false;
-            intercepted.$off(event, listener);
-        }
-    };
+    // A function of its own for every call. stop() removes exactly this registration, also
+    // when the same listener is on the event bus more than once, for example with $once.
+    function registration(...args) {
+        return listener.apply(this, args);
+    }
+
+    intercepted.$on(events, registration);
+
+    const stop = () => intercepted.$off(events, registration);
 
     if (getCurrentScope()) {
         onScopeDispose(stop);

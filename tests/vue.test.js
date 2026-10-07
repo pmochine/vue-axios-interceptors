@@ -94,6 +94,43 @@ describe('useIntercepted', () => {
         second.stop();
     });
 
+    it('removes only its own registration when the same listener is also on the bus with $once', () => {
+        const listener = vi.fn();
+        const scope = effectScope();
+        scope.run(() => useIntercepted('response:404', listener));
+        intercepted.$once('response:404', listener);
+
+        scope.stop();
+        respond(404);
+        respond(404);
+
+        expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it('removes the listener from the events of the call, also when the array changes later', () => {
+        const listener = vi.fn();
+        const events = ['response:401'];
+        const scope = effectScope();
+        scope.run(() => useIntercepted(events, listener));
+
+        events.splice(0, 1, 'response:500');
+        scope.stop();
+        respond(401);
+
+        expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('calls the listener with the event bus as this and returns its result to the bus', () => {
+        let self;
+        const scope = effectScope();
+        scope.run(() => useIntercepted('response:404', function listener() { self = this; }));
+
+        respond(404);
+
+        expect(self).toBe(intercepted);
+        scope.stop();
+    });
+
     it('works outside of a component without a warning, until stop is called', () => {
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
         const listener = vi.fn();
