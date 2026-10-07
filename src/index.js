@@ -10,12 +10,14 @@ if (typeof window !== 'undefined') {
 
 const handleResponse = (response) => {
     const categories = ['informational', 'success', 'redirection', 'client-error', 'server-error'];
-    const { status } = response;
     const codes = statusCodes();
 
-    if (!codes[status]) {
+    // A network error, a timeout or a cancelled request has no response
+    if (!response || !codes[response.status]) {
         return false;
     }
+
+    const { status } = response;
 
     const statusCategory = parseInt(status.toString().charAt(0), 10);
     const category = categories[statusCategory - 1];
