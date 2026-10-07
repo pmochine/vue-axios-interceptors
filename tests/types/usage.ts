@@ -24,6 +24,9 @@ handleResponse(undefined);
 handleResponse(null);
 handleResponse({ status: 404, data: null, headers: {} });
 
+// @ts-expect-error headers are required, so the listeners always get headers
+handleResponse({ status: 200, data: null });
+
 // @ts-expect-error status is a number
 handleResponse({ status: '404', data: null, headers: {} });
 

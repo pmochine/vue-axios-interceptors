@@ -14,8 +14,8 @@ export type InterceptedEvent = 'response' | `response:${string}`;
 export interface HandledResponse {
     /** An integer from 100 to 599. handleResponse ignores other values. */
     status: number;
-    data?: any;
-    headers?: Record<string, any>;
+    data: any;
+    headers: Record<string, any>;
 }
 
 /** The data of every event that handleResponse emits. */
