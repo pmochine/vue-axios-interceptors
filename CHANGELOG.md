@@ -25,7 +25,7 @@ Version 2.0.0 works without Vue, so it works in a Vue 3 app. Your listeners on `
 - As in Vue 2, an error in one listener does not stop the other listeners. The emitter reports the error with `reportError()` in the browser and `console.error()` without it. `Vue.config.errorHandler` and `app.config.errorHandler` no longer get these errors. The same applies to a rejected promise of an async listener.
 - A status that is not in the list of status names now sends events, for example 522 from Cloudflare. It sends all events except the name event, and `data.code` is `null`. Before, such a status sent no event.
 - The list of status names has 103 Early Hints, 419 Page Expired (Laravel, from [mattias-sanfridsson/vue-axios-interceptors#4](https://github.com/mattias-sanfridsson/vue-axios-interceptors/pull/4)) and 425 Too Early.
-- The package ships an ES module and a UMD build in `dist/`, with `"exports"` in `package.json`. The build uses Vite 8. Tests use Vitest. The development tools need Node.js 22.12 or newer. The published files have no Node.js requirement.
+- The package ships an ES module and a UMD build in `dist/`, with `"exports"` in `package.json`. The build uses Vite 8. Tests use Vitest. The development tools need Node.js 22.12 or a newer 22.x, Node.js 24, or Node.js 26 or newer. The published files have no Node.js requirement.
 
 ### Added
 

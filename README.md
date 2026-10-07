@@ -188,7 +188,7 @@ The [CHANGELOG](CHANGELOG.md) lists all changes.
 
 ## Development
 
-You need Node.js 22.12 or newer (see `.nvmrc`).
+You need Node.js 22.12 or a newer 22.x, Node.js 24, or Node.js 26 or newer. These are the versions that Vitest 5 supports. The file `.nvmrc` sets Node.js 24.
 
 ```bash
 npm install
