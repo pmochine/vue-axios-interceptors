@@ -1,5 +1,8 @@
 /**
- * The names of the HTTP status codes: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
+ * The names of the HTTP status codes. The name events use them, for example 'response:not-found'.
+ * Some names are older than the current names in RFC 9110, for example 422 Unprocessable Entity
+ * (now Unprocessable Content). Keep them, so the name events do not change.
+ * Current names: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
  */
 const statusCodes = () => ({
     100: 'Continue',

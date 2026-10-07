@@ -96,7 +96,9 @@ intercepted.$on('response:unprocessable-entity', (data) => {});
 
 Every response sends these events, in this order: `response`, `response:<category>`, `response:<name>`, `response:<status>` and `response:<first digit>xx`.
 
-The names come from the list of [HTTP status codes on MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status), for example `not-found`, `too-many-requests` or `page-expired` (419, Laravel). A status that is not in the list, for example 522 from Cloudflare, sends all events except the name event. Then `data.code` is `null`.
+The names come from the [list of status names](https://github.com/pmochine/vue-axios-interceptors/blob/master/src/statuscodes.js) of this package, for example `not-found`, `too-many-requests` or `page-expired` (419, Laravel). Some names are older than the current names on [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status). For example, 422 sends `response:unprocessable-entity`, not `response:unprocessable-content`. The names do not change, so listeners from 1.x keep working.
+
+A status that is not in the list, for example 522 from Cloudflare, sends all events except the name event. Then `data.code` is `null`. handleResponse ignores a status that is not an integer from 100 to 599.
 
 ### In a Vue 3 component
 
@@ -132,7 +134,7 @@ intercepted.$on('response:422', (data) => {
 });
 ```
 
-If the body of a 422 response has no Laravel validation errors, `data.body` is the original body.
+If the body of a 422 response has no Laravel validation errors, `data.body` is the original body. If the body of a 422 response is empty, `data.body` is `null`.
 
 For an expired CSRF token, Laravel answers with `419`. Listen for `response:419` or `response:page-expired`, for example to reload the page.
 
@@ -151,6 +153,9 @@ intercepted.$on<Record<string, string>>('response:422', (data) => {
 axios does not know the `errorHandle` option from step 2. To use it with TypeScript, add it to the axios types in your project:
 
 ```typescript
+// For example in src/axios.d.ts. The import makes the file extend the axios types.
+import 'axios';
+
 declare module 'axios' {
     interface AxiosRequestConfig {
         errorHandle?: boolean;
@@ -174,9 +179,35 @@ Other changes in version 2.x:
 - The name events work now, for example `response:not-found`. Version 1.0.x sent `response:undefined` instead.
 - A status that is not in the list sends events. Before, it sent no event.
 - `handleResponse(undefined)` returns `false`. Before, it threw a `TypeError`, so a request without a response rejected with that `TypeError` instead of the axios error.
+- The status must be a number. Version 1.x also accepted a string such as `'404'`. axios always sends a number. If your own code calls `handleResponse` with a string, convert it with `Number()`.
+- A 422 body with Laravel validation errors keeps a field named `__proto__`. If `errors` is not an object with an array per field, `data.body` is the original body. Before, for example `errors: false` gave an empty object.
 - Imports of internal files such as `@pmochine/vue-axios-interceptors/src/utility` no longer work. Use the main import.
+- All copies of version 2.x in one app share one event bus, for example an ES module copy and a CommonJS copy.
 
 The [CHANGELOG](CHANGELOG.md) lists all changes.
+
+## Development
+
+You need Node.js 22.12 or newer (see `.nvmrc`).
+
+```bash
+npm install
+npm test          # unit tests and type checks
+npm run lint
+npm run build     # builds dist/
+```
+
+`npm pack` and `npm publish` build `dist/` first.
+
+### Releases
+
+1. Set the new version in `package.json` and add it to `CHANGELOG.md`.
+2. Merge the change into `master`.
+3. Push a tag with the version number, for example `git tag 2.0.1 && git push origin 2.0.1`.
+
+The `Release` workflow then runs the lint and the tests, and publishes the package to npm. It uses npm trusted publishing, so it needs no npm token and no 2FA prompt. The tag must match the version in `package.json` and must be on `master`. Run the workflow by hand to check the setup. That run publishes nothing.
+
+On npmjs.com, the trusted publisher of the package points to this repository, the workflow `release.yml` and the environment `npm-publish`. Under "Allowed actions", it must allow `npm publish`. If a new trusted publisher does not publish within 2 days, it expires. So create it right before a release.
 
 ## Security
 
