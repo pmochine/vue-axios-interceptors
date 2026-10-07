@@ -6,10 +6,17 @@
   "main": "./dist/vue-axios-interceptors.umd.js",
   "unpkg": "./dist/vue-axios-interceptors.umd.js",
   "module": "./dist/vue-axios-interceptors.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/vue-axios-interceptors.mjs",
-      "require": "./dist/vue-axios-interceptors.umd.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/vue-axios-interceptors.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/vue-axios-interceptors.umd.js"
+      }
     },
     "./package.json": "./package.json"
   },
@@ -19,7 +26,8 @@
   "scripts": {
     "build": "vite build",
     "lint": "eslint .",
-    "test": "vitest run",
+    "test": "vitest run && npm run test:types",
+    "test:types": "tsc -p tests/types",
     "prepack": "npm run build"
   },
   "repository": {
@@ -41,10 +49,14 @@
     "url": "https://github.com/pmochine/vue-axios-interceptors/issues"
   },
   "homepage": "https://github.com/pmochine/vue-axios-interceptors#readme",
+  "peerDependencies": {
+    "axios": "^1.0.0"
+  },
   "devDependencies": {
     "axios": "^1.20.0",
     "eslint": "^9.39.5",
     "eslint-config-avidofood": "^4.0.0",
+    "typescript": "^7.0.2",
     "vite": "^8.3.3",
     "vitest": "^5.0.3"
   }
