@@ -28,7 +28,26 @@ For the old version with Vue 2, install version 1.x:
 npm install @pmochine/vue-axios-interceptors@^1.0.8
 ```
 
-### 2: Add the interceptors, for example in `errorHandler.js`
+### 2: Add the interceptors, for example in `main.js`
+
+```javascript
+import axios from 'axios';
+import { attachInterceptors } from '@pmochine/vue-axios-interceptors';
+
+attachInterceptors(axios);
+```
+
+If you use an axios instance from `axios.create()`, pass that instance. `attachInterceptors` returns a function that removes the interceptors again. A second call for the same instance adds nothing, so every event comes once.
+
+To skip the events of one failed request, set `errorHandle: false` in the request config:
+
+```javascript
+axios.get('/user/1', { errorHandle: false });
+```
+
+#### Your own interceptors
+
+If you need your own interceptors, for example to report errors to Bugsnag, call `handleResponse` in them:
 
 ```javascript
 import axios from 'axios';
@@ -55,8 +74,6 @@ axios.interceptors.response.use(
     },
 );
 ```
-
-If you use an axios instance from `axios.create()`, add the interceptors to that instance.
 
 ## Usage
 
@@ -166,7 +183,7 @@ intercepted.$on<Record<string, string>>('response:422', (data) => {
 });
 ```
 
-axios does not know the `errorHandle` option from step 2. To use it with TypeScript, add it to the axios types in your project:
+axios does not know the `errorHandle` option. To use it with TypeScript, add it to the axios types in your project:
 
 ```typescript
 // For example in src/axios.d.ts. The import makes the file extend the axios types.
@@ -188,7 +205,7 @@ Without `window`, for example in Nuxt on the server, the package does not set `w
 1. Make sure that you use axios 1.x. Version 2.x declares `axios` `^1.0.0` as a peer dependency.
 2. Version 2.x does not use Vue. If only this package needed `window.Vue = require('vue')`, you can remove that line.
 3. Your listeners on `window.intercepted` keep working. `window.intercepted` is no longer a Vue instance, so only `$on`, `$once`, `$off` and `$emit` are available.
-4. If your error handler checks `error.config.hasOwnProperty('errorHandle')`, use `error.config?.errorHandle === false` from step 2. For an error without `config`, the old check throws a `TypeError`.
+4. Replace your interceptors with `attachInterceptors(axios)` from step 2. If you keep your own interceptors and check `error.config.hasOwnProperty('errorHandle')`, use `error.config?.errorHandle === false`. For an error without `config`, the old check throws a `TypeError`.
 
 Other changes in version 2.x:
 
@@ -201,6 +218,23 @@ Other changes in version 2.x:
 - All copies of version 2.x in one app share one event bus, for example an ES module copy and a CommonJS copy.
 
 The [CHANGELOG](CHANGELOG.md) lists all changes.
+
+### Coming from `vue-axios-interceptors` without scope
+
+The original package [`vue-axios-interceptors`](https://www.npmjs.com/package/vue-axios-interceptors) needs Vue 2. Its import added the interceptors to `window.axios`. With this package, call `attachInterceptors(axios)` once instead. Your listeners on `window.intercepted` keep working.
+
+```javascript
+// Before
+window.Vue = require('vue');
+window.axios = require('axios');
+require('vue-axios-interceptors');
+
+// After
+import axios from 'axios';
+import { attachInterceptors } from '@pmochine/vue-axios-interceptors';
+
+attachInterceptors(axios);
+```
 
 ## Development
 

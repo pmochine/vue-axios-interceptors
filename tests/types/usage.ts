@@ -1,6 +1,7 @@
 // Compile-time checks for src/index.d.ts. Run with: npm run test:types
 import axios from 'axios';
 import handleResponse, {
+    attachInterceptors,
     intercepted,
     type HandledResponse,
     type InterceptedEmitter,
@@ -19,6 +20,14 @@ axios.interceptors.response.use(
         return Promise.reject(error);
     },
 );
+
+// The default axios export and an instance fit attachInterceptors
+const detach: () => void = attachInterceptors(axios);
+detach();
+attachInterceptors(axios.create({ baseURL: '/api' }));
+
+// @ts-expect-error attachInterceptors needs an axios instance
+attachInterceptors({});
 
 handleResponse(undefined);
 handleResponse(null);

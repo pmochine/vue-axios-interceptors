@@ -58,6 +58,23 @@ export interface InterceptedEmitter {
 /** The event bus. In the browser, it is also on window.intercepted. */
 export const intercepted: InterceptedEmitter;
 
+/** An axios instance from axios.create(), or the default axios export. */
+export interface InterceptableInstance {
+    interceptors: {
+        response: {
+            use(onFulfilled: (response: any) => any, onRejected: (error: any) => any): number;
+            eject(id: number): void;
+        };
+    };
+}
+
+/**
+ * Adds the response interceptors of this package to an axios instance and returns a function
+ * that removes them. A second call for the same instance adds nothing and returns the same function.
+ * A failed request with the config option errorHandle: false emits no events.
+ */
+export function attachInterceptors(instance: InterceptableInstance): () => void;
+
 /**
  * Emits the events for a response. Call it in an axios response interceptor.
  * Returns false and emits nothing if there is no response or no valid status.

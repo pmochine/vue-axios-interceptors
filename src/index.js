@@ -77,4 +77,42 @@ const handleValidationErrors = (response) => {
     }
 };
 
+// The axios instances with the interceptors of this package and their detach functions.
+// Shared like the event bus, so a second call from any copy does not add them twice.
+const attachedKey = Symbol.for('@pmochine/vue-axios-interceptors@2/attached');
+if (!globalThis[attachedKey]) {
+    globalThis[attachedKey] = new WeakMap();
+}
+const attached = globalThis[attachedKey];
+
+export const attachInterceptors = (instance) => {
+    if (attached.has(instance)) {
+        return attached.get(instance);
+    }
+
+    const id = instance.interceptors.response.use(
+        (response) => {
+            handleResponse(response);
+            return response;
+        },
+        (error) => {
+            // Skip the events for one request: axios.get('/user/1', { errorHandle: false })
+            if (!(error && error.config && error.config.errorHandle === false)) {
+                handleResponse(error && error.response);
+            }
+            return Promise.reject(error);
+        },
+    );
+
+    const detach = () => {
+        if (attached.get(instance) === detach) {
+            instance.interceptors.response.eject(id);
+            attached.delete(instance);
+        }
+    };
+    attached.set(instance, detach);
+
+    return detach;
+};
+
 export default handleResponse;

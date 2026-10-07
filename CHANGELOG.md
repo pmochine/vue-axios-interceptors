@@ -13,7 +13,7 @@ Version 2.0.0 works without Vue, so it works in a Vue 3 app. Your listeners on `
 3. `window.intercepted` is no longer a Vue instance. It has only `$on`, `$once`, `$off` and `$emit`.
 4. Imports of internal files such as `@pmochine/vue-axios-interceptors/src/utility` no longer work. Use the main import.
 5. With `require()`, `handleResponse` is the `default` property: `require('@pmochine/vue-axios-interceptors').default`.
-6. In the README, the check for `errorHandle` is now `error.config?.errorHandle === false`. For an error without `config`, the old check threw a `TypeError`.
+6. Replace your interceptors with `attachInterceptors(axios)`. If you keep your own interceptors, check `errorHandle` with `error.config?.errorHandle === false`, as the README shows. For an error without `config`, the old check threw a `TypeError`.
 7. The status must be an integer from 100 to 599. Version 1.x also accepted a string such as `'404'`. axios always sends a number. If your own code passes a string, convert it with `Number()`.
 
 ### Changed
@@ -29,6 +29,7 @@ Version 2.0.0 works without Vue, so it works in a Vue 3 app. Your listeners on `
 
 ### Added
 
+- `attachInterceptors(axios)` adds the response interceptors to axios or to an instance from `axios.create()`. It replaces the interceptor code that the README of 1.x showed. That code threw a `TypeError` on a network error and on an error without `config`. The function returns a function that removes the interceptors. A second call for the same instance adds nothing, so every event comes once. A failed request with `errorHandle: false` in its config emits no events.
 - The event data has `response`: the response that `handleResponse` got. A listener can read the request, for example `data.response.config.url`, and the body before the 422 parsing, `data.response.data`. Before, the event data had no way to find the request.
 - TypeScript types for `handleResponse`, the event bus, the event data and `window.intercepted`. The types do not import axios, so they also work in CommonJS projects with axios 1.0.
 
