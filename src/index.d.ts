@@ -31,6 +31,11 @@ export interface InterceptedResponse<T = any> {
     body: T;
     /** The response headers. */
     headers: Record<string, any>;
+    /**
+     * The response that handleResponse got, for example the axios response. Use it for the
+     * request (response.config.url) or for the body before the 422 parsing (response.data).
+     */
+    response: HandledResponse & Record<string, any>;
 }
 
 /** A listener for the events of handleResponse. */

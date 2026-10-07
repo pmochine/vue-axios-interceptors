@@ -31,7 +31,7 @@ const handleResponse = (response) => {
     const statusCategory = Math.floor(status / 100);
     const category = categories[statusCategory - 1];
     const data = {
-        status, code, body: response.data, headers: response.headers,
+        status, code, body: response.data, headers: response.headers, response,
     };
 
     // Parse the validation errors.

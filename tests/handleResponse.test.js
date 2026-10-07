@@ -19,10 +19,12 @@ describe('handleResponse', () => {
         const calls = record(['response', 'response:client-error', 'response:not-found', 'response:404', 'response:4xx']);
         const headers = { 'content-type': 'application/json' };
 
-        const handled = handleResponse({ status: 404, data: { message: 'Missing' }, headers });
+        const response = { status: 404, data: { message: 'Missing' }, headers };
+
+        const handled = handleResponse(response);
 
         const data = {
-            status: 404, code: 'Not Found', body: { message: 'Missing' }, headers,
+            status: 404, code: 'Not Found', body: { message: 'Missing' }, headers, response,
         };
         expect(handled).toBe(true);
         expect(calls).toEqual([
@@ -79,14 +81,16 @@ describe('handleResponse', () => {
         const originalEmit = intercepted.$emit;
         intercepted.$emit = (event, data) => calls.push([event, data]);
 
+        const response = { status: 522, data: 'Timeout', headers: {} };
+
         try {
-            expect(handleResponse({ status: 522, data: 'Timeout', headers: {} })).toBe(true);
+            expect(handleResponse(response)).toBe(true);
         } finally {
             intercepted.$emit = originalEmit;
         }
 
         const data = {
-            status: 522, code: null, body: 'Timeout', headers: {},
+            status: 522, code: null, body: 'Timeout', headers: {}, response,
         };
         expect(calls).toEqual([
             ['response', data],
@@ -122,6 +126,22 @@ describe('handleResponse', () => {
             team_name: 'The team name must be a string.,The team name must be at least 1 characters.',
             'users.0.email': 'The users.0.email field is required.',
         });
+    });
+
+    it('passes the original response, so a listener can read the request and the raw body', () => {
+        const calls = record(['response:422']);
+        const errors = { email: ['The email field is required.', 'The email must be valid.'] };
+        const response = {
+            status: 422, data: { errors }, headers: {}, config: { url: '/api/user', method: 'post' },
+        };
+
+        handleResponse(response);
+
+        const [[, data]] = calls;
+        expect(data.response).toBe(response);
+        expect(data.response.config.url).toBe('/api/user');
+        expect(data.response.data.errors.email).toEqual(errors.email);
+        expect(data.body.email).toBe('The email field is required.,The email must be valid.');
     });
 
     it('keeps the body of a 422 response without Laravel validation errors', () => {

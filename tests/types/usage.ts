@@ -39,6 +39,13 @@ intercepted.$on('response:404', (data) => {
     return [status, code, name];
 });
 
+// The listener can read the request and the raw body
+intercepted.$on('response:401', (data) => {
+    const url: string | undefined = data.response.config?.url;
+    const status: number = data.response.status;
+    return [url, status];
+});
+
 // The body can have a type, for example the Laravel validation errors
 intercepted.$on<Record<string, string>>('response:422', (data) => {
     const message: string | undefined = data.body.email;

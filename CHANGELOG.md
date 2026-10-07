@@ -29,6 +29,7 @@ Version 2.0.0 works without Vue, so it works in a Vue 3 app. Your listeners on `
 
 ### Added
 
+- The event data has `response`: the response that `handleResponse` got. A listener can read the request, for example `data.response.config.url`, and the body before the 422 parsing, `data.response.data`. Before, the event data had no way to find the request.
 - TypeScript types for `handleResponse`, the event bus, the event data and `window.intercepted`. The types do not import axios, so they also work in CommonJS projects with axios 1.0.
 
 ### Fixed

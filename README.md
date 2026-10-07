@@ -66,7 +66,7 @@ The package has an event bus called `intercepted`. You can import it. In the bro
 import { intercepted } from '@pmochine/vue-axios-interceptors';
 
 intercepted.$on('response', (data) => {
-    console.log(data); // { status: 404, code: 'Not Found', body: { ... }, headers: { ... } }
+    console.log(data); // { status: 404, code: 'Not Found', body: { ... }, headers: { ... }, response: { ... } }
 
     // Show the message.
 });
@@ -77,7 +77,7 @@ You can also listen for a status code or a category, for example to handle 4xx r
 ```javascript
 // All responses.
 intercepted.$on('response', (data) => {
-    // data = { status: 404, code: 'Not Found', body: { ... }, headers: { ... } }
+    // data = { status: 404, code: 'Not Found', body: { ... }, headers: { ... }, response: { ... } }
 });
 
 // All responses in the client error category (4xx).
@@ -99,6 +99,22 @@ Every response sends these events, in this order: `response`, `response:<categor
 The names come from the [list of status names](https://github.com/pmochine/vue-axios-interceptors/blob/master/src/statuscodes.js) of this package, for example `not-found`, `too-many-requests` or `page-expired` (419, Laravel). Some names are older than the current names on [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status). For example, 422 sends `response:unprocessable-entity`, not `response:unprocessable-content`. The names do not change, so listeners from 1.x keep working.
 
 A status that is not in the list, for example 522 from Cloudflare, sends all events except the name event. Then `data.code` is `null`. handleResponse ignores a status that is not an integer from 100 to 599.
+
+### The original response
+
+`data.response` is the response that handleResponse got, for example the axios response. Use it to find the request, for example to skip a 401 from the login check:
+
+```javascript
+intercepted.$on('response:401', (data) => {
+    if (data.response.config.url === '/api/user') {
+        return;
+    }
+
+    router.push('/login');
+});
+```
+
+`data.response.data` is the body before the package parses Laravel validation errors.
 
 ### In a Vue 3 component
 
