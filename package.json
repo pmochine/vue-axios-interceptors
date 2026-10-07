@@ -1,7 +1,7 @@
 {
   "name": "@pmochine/vue-axios-interceptors",
-  "version": "1.0.8",
-  "description": "Catch and handle ajax errors globally when using Axios with Vue",
+  "version": "2.0.0",
+  "description": "Catch and handle axios responses globally, for example in a Vue 3 app",
   "type": "commonjs",
   "main": "./dist/vue-axios-interceptors.umd.js",
   "unpkg": "./dist/vue-axios-interceptors.umd.js",
@@ -36,12 +36,16 @@
   },
   "keywords": [
     "vue",
+    "vue 3",
+    "vue3",
     "axios",
     "interceptors",
+    "event bus",
     "laravel",
     "validation errors",
     "ajax errors",
-    "error handling"
+    "error handling",
+    "typescript"
   ],
   "author": "Philipp Mochine",
   "license": "MIT",
