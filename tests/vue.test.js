@@ -120,7 +120,7 @@ describe('useIntercepted', () => {
         expect(listener).not.toHaveBeenCalled();
     });
 
-    it('calls the listener with the event bus as this and returns its result to the bus', () => {
+    it('calls the listener with the event bus as this', () => {
         let self;
         const scope = effectScope();
         scope.run(() => useIntercepted('response:404', function listener() { self = this; }));
@@ -128,6 +128,20 @@ describe('useIntercepted', () => {
         respond(404);
 
         expect(self).toBe(intercepted);
+        scope.stop();
+    });
+
+    it('returns the result of the listener to the bus, which reports a rejected promise', async () => {
+        const reportError = vi.fn();
+        vi.stubGlobal('reportError', reportError);
+        const error = new Error('async listener failed');
+        const scope = effectScope();
+        scope.run(() => useIntercepted('response:404', async () => { throw error; }));
+
+        respond(404);
+        await new Promise((resolve) => { setTimeout(resolve); });
+
+        expect(reportError).toHaveBeenCalledWith(error);
         scope.stop();
     });
 
