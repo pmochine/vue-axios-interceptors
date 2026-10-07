@@ -12,7 +12,7 @@
 
 The package sends an event for every axios response, for example `response:404` or `response:server-error`. A global component can listen to these events and show the error message.
 
-> **Prerequisites**: axios 1.x for version 2.x of this package. Version 2.x has no Vue dependency, so it works in a Vue 3 app. Version 1.x needs Vue 2 on `window.Vue` and gets no more updates.
+> **Prerequisites**: axios 1.x for version 2.x of this package. The main import has no Vue dependency. `useIntercepted` from `@pmochine/vue-axios-interceptors/vue` needs Vue 3.2 or newer, or Vue 2.7. Version 1.x needs Vue 2 on `window.Vue` and gets no more updates.
 
 ## Installation in 2 Steps
 
@@ -148,28 +148,40 @@ intercepted.$on('no-response', (data) => {
 
 A cancelled request, for example with an `AbortController`, sends no event. A request that did not go out, for example because a request interceptor threw an error, also sends no event. If you use your own interceptors, `no-response` is not sent.
 
-### In a Vue 3 component
+### In a Vue component
 
-Add the listener in `onMounted` and remove it in `onBeforeUnmount`. Otherwise, the listener stays on the event bus after the component is gone.
+`useIntercepted` adds a listener. When the component unmounts, it removes the listener. Without that, the listener stays on the event bus after the component is gone.
 
 ```vue
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { intercepted } from '@pmochine/vue-axios-interceptors';
+import { ref } from 'vue';
+import { useIntercepted } from '@pmochine/vue-axios-interceptors/vue';
 
 const message = ref('');
 
-const showError = (data) => {
+useIntercepted('response:client-error', (data) => {
     message.value = `${data.status} ${data.code}`;
-};
+});
 
-onMounted(() => intercepted.$on('response:client-error', showError));
-onBeforeUnmount(() => intercepted.$off('response:client-error', showError));
+useIntercepted('no-response', () => {
+    message.value = 'Please check your connection.';
+});
 </script>
 
 <template>
     <p v-if="message">{{ message }}</p>
 </template>
+```
+
+`useIntercepted` takes the same events and listeners as `intercepted.$on`, also an array of events. It returns a function that removes the listener earlier. Outside of a component, for example in a store, the listener stays until the effect scope stops or until you call that function. On the server, it adds no listener, because the server does not unmount components.
+
+`useIntercepted` works with Vue 3.2 or newer and with Vue 2.7. Vue is an optional peer dependency: you only need it for this import.
+
+Without `useIntercepted`, add the listener in `onMounted` and remove it in `onBeforeUnmount`:
+
+```javascript
+onMounted(() => intercepted.$on('response:client-error', showError));
+onBeforeUnmount(() => intercepted.$off('response:client-error', showError));
 ```
 
 ### Using this package with Laravel
@@ -213,7 +225,7 @@ declare module 'axios' {
 
 ### Server-side rendering
 
-Without `window`, for example in Nuxt on the server, the package does not set `window.intercepted`. Import `intercepted` instead. The event bus is shared by all requests on the server, so add listeners only in the browser, for example in `onMounted`.
+Without `window`, for example in Nuxt on the server, the package does not set `window.intercepted`. Import `intercepted` instead. The event bus is shared by all requests on the server, so add listeners only in the browser. `useIntercepted` does that for you. Without it, add listeners in `onMounted`.
 
 ## Upgrade from 1.x
 

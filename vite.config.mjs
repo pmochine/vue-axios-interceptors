@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 const fromRoot = (file) => fileURLToPath(new URL(file, import.meta.url));
 
 // One file per import path of the package, see "exports" in package.json
-const entries = ['index'];
+const entries = ['index', 'vue'];
 
 // Copies the hand-written types next to the build. Without "type": "module" in package.json,
 // TypeScript reads a .d.ts file as CommonJS and a .d.mts file as ESM, so we ship both.
@@ -36,6 +36,8 @@ export default defineConfig({
             fileName: (format, entry) => `${entry}.${format === 'es' ? 'mjs' : 'cjs'}`,
         },
         rolldownOptions: {
+            // An optional peer dependency, only for the vue entry
+            external: ['vue'],
             output: {
                 // index.js has a named and a default export
                 exports: 'named',
