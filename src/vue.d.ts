@@ -12,7 +12,7 @@ export function useIntercepted<T = any>(
     listener: InterceptedListener<T>,
 ): () => void;
 export function useIntercepted(
-    event: 'no-response',
+    event: 'no-response' | 'no-response'[],
     listener: (this: InterceptedEmitter, data: InterceptedNoResponse) => unknown,
 ): () => void;
 export function useIntercepted(

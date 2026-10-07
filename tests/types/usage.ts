@@ -63,6 +63,10 @@ intercepted.$on('no-response', (data) => {
     return [code, data.status];
 });
 intercepted.$once('no-response', (data: InterceptedNoResponse) => data.error);
+// @ts-expect-error no-response has no status, also in an array
+intercepted.$on(['no-response'], (data) => data.status);
+// @ts-expect-error no-response has no status, also with $once
+intercepted.$once(['no-response'], (data) => data.status);
 
 // The body can have a type, for example the Laravel validation errors
 intercepted.$on<Record<string, string>>('response:422', (data) => {

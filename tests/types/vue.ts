@@ -15,5 +15,8 @@ useIntercepted('user:logout', (user: { id: number }) => user.id);
 // @ts-expect-error no-response has no status
 useIntercepted('no-response', (data) => data.status);
 
+// @ts-expect-error no-response has no status, also in an array
+useIntercepted(['no-response'], (data) => data.status);
+
 // @ts-expect-error the event name is a string
 useIntercepted(401, () => {});

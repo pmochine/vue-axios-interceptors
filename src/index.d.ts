@@ -52,10 +52,10 @@ export type InterceptedListener<T = any> = (this: InterceptedEmitter, data: Inte
 /** The event bus. It has the event methods of a Vue 2 instance. */
 export interface InterceptedEmitter {
     $on<T = any>(event: InterceptedEvent | InterceptedEvent[], callback: InterceptedListener<T>): this;
-    $on(event: 'no-response', callback: (this: InterceptedEmitter, data: InterceptedNoResponse) => unknown): this;
+    $on(event: 'no-response' | 'no-response'[], callback: (this: InterceptedEmitter, data: InterceptedNoResponse) => unknown): this;
     $on(event: string | string[], callback: (this: InterceptedEmitter, ...args: any[]) => unknown): this;
     $once<T = any>(event: InterceptedEvent | InterceptedEvent[], callback: InterceptedListener<T>): this;
-    $once(event: 'no-response', callback: (this: InterceptedEmitter, data: InterceptedNoResponse) => unknown): this;
+    $once(event: 'no-response' | 'no-response'[], callback: (this: InterceptedEmitter, data: InterceptedNoResponse) => unknown): this;
     $once(event: string | string[], callback: (this: InterceptedEmitter, ...args: any[]) => unknown): this;
     /**
      * Without arguments, removes all listeners. With an event, removes all listeners of the event.
