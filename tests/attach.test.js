@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, CanceledError } from 'axios';
 // The exports map of axios only has this path with the extension
 import settle from 'axios/unsafe/core/settle.js'; // eslint-disable-line import/extensions
 import {
@@ -84,6 +84,69 @@ describe('attachInterceptors', () => {
         const client = axios.create({ adapter: respondWith(500) });
         const listener = vi.fn();
         intercepted.$on('response', listener);
+        attachInterceptors(client);
+
+        await expect(client.get('/user/1', { errorHandle: false })).rejects.toBeInstanceOf(AxiosError);
+
+        expect(listener).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        ['a network error', AxiosError.ERR_NETWORK],
+        ['a timeout', AxiosError.ECONNABORTED],
+    ])('emits no-response for %s', async (name, code) => {
+        const listener = vi.fn();
+        const responseListener = vi.fn();
+        intercepted.$on('no-response', listener);
+        intercepted.$on('response', responseListener);
+        let error;
+        const client = axios.create({
+            adapter: (config) => {
+                error = new AxiosError(name, code, config, {});
+                return Promise.reject(error);
+            },
+        });
+        attachInterceptors(client);
+
+        await expect(client.get('/user/1')).rejects.toBeInstanceOf(AxiosError);
+
+        expect(listener).toHaveBeenCalledTimes(1);
+        expect(listener).toHaveBeenCalledWith({ code, error });
+        expect(listener.mock.calls[0][0].error.config.url).toBe('/user/1');
+        expect(responseListener).not.toHaveBeenCalled();
+    });
+
+    it('emits no no-response for a cancelled request', async () => {
+        const listener = vi.fn();
+        intercepted.$on('no-response', listener);
+        const client = axios.create({
+            adapter: (config) => Promise.reject(new CanceledError(undefined, config, {})),
+        });
+        attachInterceptors(client);
+
+        await expect(client.get('/user/1')).rejects.toBeInstanceOf(CanceledError);
+
+        expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('emits no no-response when the request was not sent', async () => {
+        const listener = vi.fn();
+        intercepted.$on('no-response', listener);
+        const client = axios.create({ adapter: respondWith(200) });
+        client.interceptors.request.use(() => { throw new Error('No token'); });
+        attachInterceptors(client);
+
+        await expect(client.get('/user/1')).rejects.toThrow('No token');
+
+        expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('emits no no-response for a request with errorHandle: false', async () => {
+        const listener = vi.fn();
+        intercepted.$on('no-response', listener);
+        const client = axios.create({
+            adapter: (config) => Promise.reject(new AxiosError('Network Error', AxiosError.ERR_NETWORK, config, {})),
+        });
         attachInterceptors(client);
 
         await expect(client.get('/user/1', { errorHandle: false })).rejects.toBeInstanceOf(AxiosError);

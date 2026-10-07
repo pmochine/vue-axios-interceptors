@@ -85,6 +85,9 @@ if (!globalThis[attachedKey]) {
 }
 const attached = globalThis[attachedKey];
 
+// The same check as axios.isCancel(). A cancelled request is no error to show.
+const isCancel = (error) => Boolean(error.__CANCEL__); // eslint-disable-line no-underscore-dangle
+
 export const attachInterceptors = (instance) => {
     if (attached.has(instance)) {
         return attached.get(instance);
@@ -97,9 +100,17 @@ export const attachInterceptors = (instance) => {
         },
         (error) => {
             // Skip the events for one request: axios.get('/user/1', { errorHandle: false })
-            if (!(error && error.config && error.config.errorHandle === false)) {
-                handleResponse(error && error.response);
+            if (error && error.config && error.config.errorHandle === false) {
+                return Promise.reject(error);
             }
+
+            if (error && error.response) {
+                handleResponse(error.response);
+            } else if (error && error.request && !isCancel(error)) {
+                // The request went out, but no response came back: a network error or a timeout
+                intercepted.$emit('no-response', { code: error.code || null, error });
+            }
+
             return Promise.reject(error);
         },
     );

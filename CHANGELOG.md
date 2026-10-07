@@ -29,6 +29,7 @@ Version 2.0.0 works without Vue, so it works in a Vue 3 app. Your listeners on `
 
 ### Added
 
+- With `attachInterceptors`, a request without a response sends the event `no-response` with `{ code, error }`. Examples are a network error (`ERR_NETWORK`) and a timeout (`ECONNABORTED`). Before, the event bus did not see these requests. A cancelled request sends no event.
 - `attachInterceptors(axios)` adds the response interceptors to axios or to an instance from `axios.create()`. It replaces the interceptor code that the README of 1.x showed. That code threw a `TypeError` on a network error and on an error without `config`. The function returns a function that removes the interceptors. A second call for the same instance adds nothing, so every event comes once. A failed request with `errorHandle: false` in its config emits no events.
 - The event data has `response`: the response that `handleResponse` got. A listener can read the request, for example `data.response.config.url`, and the body before the 422 parsing, `data.response.data`. Before, the event data had no way to find the request.
 - TypeScript types for `handleResponse`, the event bus, the event data and `window.intercepted`. The types do not import axios, so they also work in CommonJS projects with axios 1.0.

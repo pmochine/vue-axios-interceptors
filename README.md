@@ -133,6 +133,21 @@ intercepted.$on('response:401', (data) => {
 
 `data.response.data` is the body before the package parses Laravel validation errors.
 
+### Requests without a response
+
+On a network error or a timeout, no response comes back, so there is no `response` event. With `attachInterceptors`, such a request sends the event `no-response` instead:
+
+```javascript
+intercepted.$on('no-response', (data) => {
+    console.log(data.code); // 'ERR_NETWORK' or 'ECONNABORTED' (timeout)
+    console.log(data.error.config.url); // the request
+
+    // Show "Please check your connection".
+});
+```
+
+A cancelled request, for example with an `AbortController`, sends no event. A request that did not go out, for example because a request interceptor threw an error, also sends no event. If you use your own interceptors, `no-response` is not sent.
+
 ### In a Vue 3 component
 
 Add the listener in `onMounted` and remove it in `onBeforeUnmount`. Otherwise, the listener stays on the event bus after the component is gone.

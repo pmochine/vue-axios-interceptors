@@ -5,6 +5,7 @@ import handleResponse, {
     intercepted,
     type HandledResponse,
     type InterceptedEmitter,
+    type InterceptedNoResponse,
     type InterceptedResponse,
 } from '../../src/index';
 
@@ -54,6 +55,14 @@ intercepted.$on('response:401', (data) => {
     const status: number = data.response.status;
     return [url, status];
 });
+
+// The no-response event has its own data
+intercepted.$on('no-response', (data) => {
+    const code: string | null = data.code;
+    // @ts-expect-error no-response has no status
+    return [code, data.status];
+});
+intercepted.$once('no-response', (data: InterceptedNoResponse) => data.error);
 
 // The body can have a type, for example the Laravel validation errors
 intercepted.$on<Record<string, string>>('response:422', (data) => {

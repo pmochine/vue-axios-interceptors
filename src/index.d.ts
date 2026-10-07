@@ -38,14 +38,24 @@ export interface InterceptedResponse<T = any> {
     response: HandledResponse & Record<string, any>;
 }
 
+/** The data of the no-response event: a request went out, but no response came back. */
+export interface InterceptedNoResponse {
+    /** The error code of axios, for example 'ERR_NETWORK' or 'ECONNABORTED'. null without a code. */
+    code: string | null;
+    /** The axios error. error.config has the request. */
+    error: any;
+}
+
 /** A listener for the events of handleResponse. */
 export type InterceptedListener<T = any> = (this: InterceptedEmitter, data: InterceptedResponse<T>) => unknown;
 
 /** The event bus. It has the event methods of a Vue 2 instance. */
 export interface InterceptedEmitter {
     $on<T = any>(event: InterceptedEvent | InterceptedEvent[], callback: InterceptedListener<T>): this;
+    $on(event: 'no-response', callback: (this: InterceptedEmitter, data: InterceptedNoResponse) => unknown): this;
     $on(event: string | string[], callback: (this: InterceptedEmitter, ...args: any[]) => unknown): this;
     $once<T = any>(event: InterceptedEvent | InterceptedEvent[], callback: InterceptedListener<T>): this;
+    $once(event: 'no-response', callback: (this: InterceptedEmitter, data: InterceptedNoResponse) => unknown): this;
     $once(event: string | string[], callback: (this: InterceptedEmitter, ...args: any[]) => unknown): this;
     /**
      * Without arguments, removes all listeners. With an event, removes all listeners of the event.
@@ -71,7 +81,9 @@ export interface InterceptableInstance {
 /**
  * Adds the response interceptors of this package to an axios instance and returns a function
  * that removes them. A second call for the same instance adds nothing and returns the same function.
- * A failed request with the config option errorHandle: false emits no events.
+ * A failed request with the config option errorHandle: false emits no events. A request without
+ * a response, for example on a network error or a timeout, emits no-response. A cancelled
+ * request emits nothing.
  */
 export function attachInterceptors(instance: InterceptableInstance): () => void;
 
