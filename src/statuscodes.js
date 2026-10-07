@@ -1,10 +1,14 @@
 /**
- * Look here: https://httpstatuses.com/
+ * The names of the HTTP status codes. The name events use them, for example 'response:not-found'.
+ * Some names are older than the current names in RFC 9110, for example 422 Unprocessable Entity
+ * (now Unprocessable Content). Keep them, so the name events do not change.
+ * Current names: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
  */
 const statusCodes = () => ({
     100: 'Continue',
     101: 'Switching Protocols',
     102: 'Processing',
+    103: 'Early Hints',
 
     200: 'OK',
     201: 'Created',
@@ -45,10 +49,13 @@ const statusCodes = () => ({
     416: 'Requested Range Not Satisfiable',
     417: 'Expectation Failed',
     418: 'I\'m a teapot',
+    // Laravel answers with 419 when the CSRF token expired
+    419: 'Page Expired',
     421: 'Misdirected Request',
     422: 'Unprocessable Entity',
     423: 'Locked',
     424: 'Failed Dependency',
+    425: 'Too Early',
     426: 'Upgrade Required',
     428: 'Precondition Required',
     429: 'Too Many Requests',
