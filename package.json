@@ -3,19 +3,18 @@
   "version": "2.0.0",
   "description": "Catch and handle axios responses globally, for example in a Vue 3 app",
   "type": "commonjs",
-  "main": "./dist/vue-axios-interceptors.umd.js",
-  "unpkg": "./dist/vue-axios-interceptors.umd.js",
-  "module": "./dist/vue-axios-interceptors.mjs",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
         "types": "./dist/index.d.mts",
-        "default": "./dist/vue-axios-interceptors.mjs"
+        "default": "./dist/index.mjs"
       },
       "require": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/vue-axios-interceptors.umd.js"
+        "default": "./dist/index.cjs"
       }
     },
     "./package.json": "./package.json"
