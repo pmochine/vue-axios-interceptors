@@ -1,11 +1,12 @@
-try {
-    window.intercepted = new Vue();
-} catch (e) {
-    console.error('Require vue-axios-interceptors after you require Vue.'); //eslint-disable-line
+import createEmitter from './emitter';
+import { slugify, statusCodes } from './utility';
+
+export const intercepted = createEmitter();
+
+// Version 1.x put the event bus on window. Listeners written for 1.x keep working.
+if (typeof window !== 'undefined') {
+    window.intercepted = intercepted;
 }
-
-import { slugify, statusCodes } from './src/utility';
-
 
 const handleResponse = (response) => {
     const categories = ['informational', 'success', 'redirection', 'client-error', 'server-error'];
@@ -19,18 +20,20 @@ const handleResponse = (response) => {
     const statusCategory = parseInt(status.toString().charAt(0), 10);
     const category = categories[statusCategory - 1];
     const sluggedCode = slugify(codes[status]);
-    const data = { status, code: codes[status], body: response.data, headers: response.headers };
+    const data = {
+        status, code: codes[status], body: response.data, headers: response.headers,
+    };
 
     // Parse the validation errors.
     if (parseInt(status, 10) === 422) {
         data.body = handleValidationErrors(response);
     }
 
-    window.intercepted.$emit('response', data);
-    window.intercepted.$emit(`response:${category}`, data);
-    window.intercepted.$emit(`response:${sluggedCode}`, data);
-    window.intercepted.$emit(`response:${status}`, data);
-    window.intercepted.$emit(`response:${statusCategory}xx`, data);
+    intercepted.$emit('response', data);
+    intercepted.$emit(`response:${category}`, data);
+    intercepted.$emit(`response:${sluggedCode}`, data);
+    intercepted.$emit(`response:${status}`, data);
+    intercepted.$emit(`response:${statusCategory}xx`, data);
 
     return true;
 };

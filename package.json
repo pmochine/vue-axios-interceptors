@@ -2,14 +2,25 @@
   "name": "@pmochine/vue-axios-interceptors",
   "version": "1.0.8",
   "description": "Catch and handle ajax errors globally when using Axios with Vue",
-  "main": "intercept.js",
-  "dependencies": {},
-  "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-config-avidofood": "^1.1.0"
+  "type": "commonjs",
+  "main": "./dist/vue-axios-interceptors.umd.js",
+  "unpkg": "./dist/vue-axios-interceptors.umd.js",
+  "module": "./dist/vue-axios-interceptors.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/vue-axios-interceptors.mjs",
+      "require": "./dist/vue-axios-interceptors.umd.js"
+    },
+    "./package.json": "./package.json"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "vite build",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "prepack": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -29,5 +40,12 @@
   "bugs": {
     "url": "https://github.com/pmochine/vue-axios-interceptors/issues"
   },
-  "homepage": "https://github.com/pmochine/vue-axios-interceptors#readme"
+  "homepage": "https://github.com/pmochine/vue-axios-interceptors#readme",
+  "devDependencies": {
+    "axios": "^1.20.0",
+    "eslint": "^9.39.5",
+    "eslint-config-avidofood": "^4.0.0",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  }
 }
