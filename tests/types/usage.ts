@@ -2,6 +2,7 @@
 import axios from 'axios';
 import handleResponse, {
     intercepted,
+    type HandledResponse,
     type InterceptedEmitter,
     type InterceptedResponse,
 } from '../../src/index';
@@ -59,7 +60,21 @@ const chained: InterceptedEmitter = intercepted.$on('response', listener).$off('
 const global: InterceptedEmitter = window.intercepted;
 window.intercepted.$on('response:server-error', listener);
 
+// As in Vue 2, a listener gets the event bus as this
+intercepted.$on('response', function onResponse(data) {
+    this.$off('response', onResponse);
+    return data.status;
+});
+intercepted.$on('user:logout', function onLogout() {
+    return this.$emit('user:gone');
+});
+intercepted.$off('response', null);
+
+// An axios response fits the response type of handleResponse
+declare const axiosResponse: import('axios').AxiosResponse<{ id: number }>;
+const fits: HandledResponse = axiosResponse;
+
 // @ts-expect-error the event name is a string
 intercepted.$on(404, listener);
 
-export { chained, global };
+export { chained, global, fits };
