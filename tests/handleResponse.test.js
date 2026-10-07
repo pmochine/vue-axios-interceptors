@@ -15,8 +15,8 @@ describe('handleResponse', () => {
         intercepted.$off();
     });
 
-    it('emits the general, category, status and status class events', () => {
-        const calls = record(['response', 'response:client-error', 'response:404', 'response:4xx']);
+    it('emits the general, category, name, status and status class events', () => {
+        const calls = record(['response', 'response:client-error', 'response:not-found', 'response:404', 'response:4xx']);
         const headers = { 'content-type': 'application/json' };
 
         const handled = handleResponse({ status: 404, data: { message: 'Missing' }, headers });
@@ -28,9 +28,24 @@ describe('handleResponse', () => {
         expect(calls).toEqual([
             ['response', data],
             ['response:client-error', data],
+            ['response:not-found', data],
             ['response:404', data],
             ['response:4xx', data],
         ]);
+    });
+
+    it.each([
+        [404, 'not-found'],
+        [422, 'unprocessable-entity'],
+        [418, 'im-a-teapot'],
+        [203, 'non-authoritative-information'],
+        [414, 'request-uri-too-long'],
+    ])('emits the name event of status %i', (status, name) => {
+        const calls = record([`response:${name}`, 'response:undefined']);
+
+        handleResponse({ status, data: null, headers: {} });
+
+        expect(calls.map(([event]) => event)).toEqual([`response:${name}`]);
     });
 
     it.each([

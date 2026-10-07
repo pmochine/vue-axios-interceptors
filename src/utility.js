@@ -3,7 +3,7 @@ import codes from './statuscodes';
 export const statusCodes = codes;
 
 export function slugify(string) {
-    string.toString()
+    return string.toString()
         .toLowerCase()
         .trim()
         .replace(/\s+/g, '-') // Replace spaces with -
